@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>旅客伤病亡事件调查报告生成器</title>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <style>
+        body {
+            background-color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 500;
+            font-size: 24px;
+        }
+
+        .form-section {
+            background-color: rgba(30, 30, 30, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        label {
+            display: block;
+            color: #999999;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        input[type="date"],
+        select,
+        textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            background-color: rgba(45, 45, 45, 0.95);
+            border: 1px solid #333333;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #ffffff;
+            transition: all 0.2s ease;
+            margin-right: 10px;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            border-color: #FF5722;
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 87, 34, 0.1);
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            background-color: #FF5722;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 0 10px;
+        }
+
+        button:hover {
+            background-color: #F4511E;
+            transform: translateY(-1px);
+        }
+
+        button.preview-btn {
+            background-color: #424242;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>旅客伤病亡事件调查报告生成器</h1>
+        
+        <div class="form-section">
+            <div class="form-row">
+                <div class="form-group full-width">
+                    <label for="mainEvent">主要事由：</label>
+                    <input type="text" id="mainEvent">
+                    <div style="color: #FF5722; font-size: 12px; margin-top: 5px;">
+                        例：2024年12月1日MU5028进港航班旅客下机脚扭伤
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="passengerName">旅客姓名(年龄)：</label>
+                    <input type="text" id="passengerName">
+                </div>
+                <div class="form-group">
+                    <label for="gender">性别：</label>
+                    <select id="gender">
+                        <option value="">请选择</option>
+                        <option value="男">男</option>
+                        <option value="女">女</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nationality">国籍：</label>
+                    <input type="text" id="nationality">
+                </div>
+                <div class="form-group">
+                    <label for="eventDate">事发日期：</label>
+                    <input type="date" id="eventDate">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>航班信息</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="flightNumber">航班号：</label>
+                    <input type="text" id="flightNumber">
+                </div>
+                <div class="form-group">
+                    <label for="flightDate">航班日期：</label>
+                    <input type="date" id="flightDate">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="route">航程：</label>
+                    <input type="text" id="route">
+                </div>
+                <div class="form-group">
+                    <label for="flightTime">实际起飞（到达）时间：</label>
+                    <input type="text" id="flightTime" placeholder="HH:MM">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bridgeGate">桥口：</label>
+                    <input type="text" id="bridgeGate">
+                </div>
+                <div class="form-group">
+                    <label for="ticketNumber">票号：</label>
+                    <input type="text" id="ticketNumber">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h2>旅客信息</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="idNumber">身份证(护照)号：</label>
+                    <input type="text" id="idNumber">
+                </div>
+                <div class="form-group">
+                    <label for="seatNumber">座位号：</label>
+                    <input type="text" id="seatNumber">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="contact">联系方式：</label>
+                    <input type="text" id="contact">
+                </div>
+                <div class="form-group">
+                    <label for="accompaniedInfo">陪同旅客信息：</label>
+                    <input type="text" id="accompaniedInfo">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="eventProcess">事情经过：</label>
+                <textarea id="eventProcess"></textarea>
+                <div style="color: #FF5722; font-size: 12px; margin-top: 5px;">
+                    正文中可体现如下四个部分<br>
+                    第一部分：航班信息数据<br>
+                    第二部分：受伤旅客行程相关信息（如:票号、舱位、座位号、登机序号、衔接航班、旅客值机登机时间、同行人员信息等）<br>
+                    第三部分：事发过程（按时间轴方式提写）<br>
+                    第四部分：补充信息（是否有事件见证人？内部单据、与案情相关图片材料等）
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="handling">处置情况：</label>
+                <textarea id="handling"></textarea>
+                <div style="color: #FF5722; font-size: 12px; margin-top: 5px;">
+                    正文中可体现如下两个部分<br>
+                    经医院确诊的病情<br>
+                    后续可能的治疗
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="expenses">垫付费用：</label>
+                <input type="text" id="expenses">
+            </div>
+
+            <div class="form-group">
+                <label for="causeCategory">成因归类：</label>
+                <select id="causeCategory" style="width: calc(100% - 20px);">
+                    <option value="">请选择</option>
+                    <option value="01. 机上行李砸伤（员工涉事）">01. 机上行李砸伤（员工涉事）</option>
+                    <option value="01. 机上行李砸伤（旅客之间）">01. 机上行李砸伤（旅客之间）</option>
+                    <option value="02. 上下客梯车、摆渡车及廊桥受伤">02. 上下客梯车、摆渡车及廊桥受伤</option>
+                    <option value="03. 摆渡车非正常行驶致伤">03. 摆渡车非正常行驶致伤</option>
+                    <option value="04. 空中颠簸致伤">04. 空中颠簸致伤</option>
+                    <option value="05. 机上烫伤">05. 机上烫伤</option>
+                    <option value="06. 设备使用不当">06. 设备使用不当，涉及设备：</option>
+                    <option value="07. 贵宾室内受伤">07. 贵宾室内受伤</option>
+                    <option value="08. 地面安排宾馆受伤">08. 地面安排宾馆受伤</option>
+                    <option value="09. 旅客自身（健康）原因">09. 旅客自身（健康）原因</option>
+                    <option value="10. 其他">10. 其他：</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button class="preview-btn" onclick="previewReport()">预览报告</button>
+            <button onclick="exportToWord()">导出Word</button>
+        </div>
+    </div>
+
+    <script>
+        function exportToWord() {
+            try {
+                // 获取所有输入值
+                const values = {
+                    mainEvent: document.getElementById('mainEvent').value || '',
+                    eventDate: document.getElementById('eventDate').value || '',
+                    flightNumber: document.getElementById('flightNumber').value || '',
+                    flightDate: document.getElementById('flightDate').value || '',
+                    passengerName: document.getElementById('passengerName').value || '',
+                    passengerAge: document.getElementById('passengerAge')?.value || '',
+                    gender: document.getElementById('gender').value || '',
+                    nationality: document.getElementById('nationality').value || '',
+                    route: document.getElementById('route').value || '',
+                    flightTime: document.getElementById('flightTime').value || '',
+                    bridgeGate: document.getElementById('bridgeGate').value || '',
+                    ticketNumber: document.getElementById('ticketNumber').value || '',
+                    idNumber: document.getElementById('idNumber').value || '',
+                    seatNumber: document.getElementById('seatNumber').value || '',
+                    contact: document.getElementById('contact').value || '',
+                    accompaniedInfo: document.getElementById('accompaniedInfo').value || '',
+                    eventProcess: document.getElementById('eventProcess').value || '',
+                    expenses: document.getElementById('expenses').value || '',
+                    handling: document.getElementById('handling').value || '',
+                    causeCategory: document.getElementById('causeCategory').value || ''
+                };
+
+                // 格式化日期
+                const formatDate = (dateStr) => {
+                    if (!dateStr) return '';
+                    const date = new Date(dateStr);
+                    return `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+                };
+
+                // 生成文档内容
+                const content = `
+                    <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                    <head>
+                        <meta charset='utf-8'>
+                        <style>
+                            body { font-family: SimSun; font-size: 12pt; line-height: 1.5; }
+                            .title { text-align: center; font-size: 16pt; font-weight: bold; margin: 20px 0; }
+                            table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+                            td { border: 1px solid black; padding: 8px; }
+                            .highlight { color: red; }
+                            .section-title { font-weight: bold; margin-top: 15px; margin-bottom: 10px; }
+                            .content-line { margin: 5px 0; }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="title">旅客伤病亡事件调查报告</div>
+                        
+                        <table>
+                            <tr>
+                                <td width="50%">反馈单位：浦东旅客服务中心</td>
+                                <td>投诉编号（若已建案）：<span class="highlight">${values.complaintNumber || ''}</span></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">主要事由及日期：<span class="highlight">${values.mainEvent}</span>（<span class="highlight">${formatDate(values.eventDate)}</span>）</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">航班（日期）：<span class="highlight">${values.flightNumber}</span>（<span class="highlight">${formatDate(values.flightDate)}</span>）</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">旅客姓名（年龄）：<span class="highlight">${values.passengerName}</span>（<span class="highlight">${values.passengerAge}</span>）</td>
+                            </tr>
+                            <tr>
+                                <td width="50%">性别：<span class="highlight">${values.gender}</span></td>
+                                <td>国籍：<span class="highlight">${values.nationality}</span></td>
+                            </tr>
+                        </table>
+
+                        <div class="section-title">一、事情经过</div>
+                        
+                        <div class="section-title">1、航班信息</div>
+                        <div class="content-line">航班日期：<span class="highlight">${formatDate(values.flightDate)}</span></div>
+                        <div class="content-line">航班号：<span class="highlight">${values.flightNumber}</span></div>
+                        <div class="content-line">航程：<span class="highlight">${values.route}</span></div>
+                        <div class="content-line">起飞（抵达）时间：<span class="highlight">${values.flightTime}</span></div>
+                        <div class="content-line">桥口：<span class="highlight">${values.bridgeGate}</span></div>
+
+                        <div class="section-title">2、旅客信息</div>
+                        <div class="content-line">旅客姓名：<span class="highlight">${values.passengerName}</span></div>
+                        <div class="content-line">票号：<span class="highlight">${values.ticketNumber}</span></div>
+                        <div class="content-line">身份证：<span class="highlight">${values.idNumber}</span></div>
+                        <div class="content-line">座位号：<span class="highlight">${values.seatNumber}</span></div>
+                        <div class="content-line">联系方式：<span class="highlight">${values.contact}</span></div>
+                        <div class="content-line">陪同旅客信息：<span class="highlight">${values.accompaniedInfo}</span></div>
+
+                        <div class="section-title">3、事情经过</div>
+                        <div class="content-line"><span class="highlight">${values.eventProcess}</span></div>
+
+                        <div class="section-title">4、垫付费用</div>
+                        <div class="content-line"><span class="highlight">${values.expenses}</span></div>
+
+                        <div class="section-title">二、成因归类</div>
+                        <div class="content-line"><span class="highlight">${values.causeCategory}</span></div>
+
+                        <div class="section-title">三、处置情况</div>
+                        <div class="content-line"><span class="highlight">${values.handling}</span></div>
+
+                        <div class="section-title">四、内部认定及改进</div>
+                        <div class="content-line">暂无</div>
+
+                        <div class="section-title">五、附件</div>
+                        <div class="content-line"></div>
+
+                        <div style="text-align: right; margin-top: 50px;">
+                            <div>服务质量管理部门盖章或总经理签字</div>
+                            <div style="margin-top: 20px;">日期：_______________</div>
+                        </div>
+                    </body>
+                    </html>
+                `;
+
+                // 转换为Word文档
+                const converted = htmlDocx.asBlob(content);
+
+                // 下载文件
+                const fileName = `${values.mainEvent}的调查报告.docx`;
+                const downloadLink = document.createElement('a');
+                downloadLink.href = URL.createObjectURL(converted);
+                downloadLink.download = fileName;
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                document.body.removeChild(downloadLink);
+            } catch (error) {
+                console.error('导出文档时发生错误:', error);
+                alert('导出文档失败，请重试');
+            }
+        }
+
+        function previewReport() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 1000px;
+                max-height: 80vh;
+                overflow-y: auto;
+                color: #000;
+            `;
+
+            // 获取表格数据
+            const headerData = [
+                { label: '航班日期', value: document.getElementById('flightDate').value },
+                { label: '航班号', value: document.getElementById('flightNumber').value },
+                { label: '航程', value: document.getElementById('route').value },
+                { label: '旅客姓名', value: document.getElementById('passengerName').value },
+                { label: '主要事由', value: document.getElementById('mainEvent').value },
+                { label: '垫付费用', value: document.getElementById('expenses').value || '无' },
+                { label: '成因归类', value: document.getElementById('causeCategory').value }
+            ];
+
+            // 创建预览表格
+            const labels = headerData.map(item => 
+                `<th style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5; text-align: center; width: ${100/headerData.length}%">${item.label}</th>`
+            ).join('');
+            const values = headerData.map(item => 
+                `<td style="border: 1px solid #ddd; padding: 12px; text-align: center;">${item.value}</td>`
+            ).join('');
+
+            content.innerHTML = `
+                <h2 style="text-align: center; margin-bottom: 20px;">事件报告预览</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <tr>${labels}</tr>
+                    <tr>${values}</tr>
+                </table>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <tr>
+                        <th style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5; text-align: left;">事情经过</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: left; white-space: pre-wrap;">${document.getElementById('eventProcess').value || '无'}</td>
+                    </tr>
+                    <tr>
+                        <th style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5; text-align: left;">处置情况</th>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px; text-align: left; white-space: pre-wrap;">${document.getElementById('handling').value || '无'}</td>
+                    </tr>
+                </table>
+                <div style="text-align: center;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                            style="padding: 8px 16px; background: #FF5722; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        关闭预览
+                    </button>
+                </div>
+            `;
+
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            // 点击模态框外部关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>汇率换算</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            color: #fff;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background-color: #000;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.1);
+        }
+        .page-title {
+            color: #fff;
+            font-size: 16px;
+            text-align: left;
+            margin-bottom: 20px;
+            padding-left: 5px;
+        }
+        .exchange-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .exchange-card {
+            background-color: #222;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        .currency-symbol {
+            font-size: 24px;
+            color: #ffa500;
+            margin-bottom: 10px;
+        }
+        .currency-name {
+            font-size: 14px;
+            color: #aaa;
+            margin-bottom: 10px;
+        }
+        .exchange-rate {
+            font-size: 16px;
+            color: #fff;
+        }
+        .converted-amount {
+            font-size: 18px;
+            color: #4CAF50;
+            margin-top: 10px;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 20px;
+            background-color: #222;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .currency-select {
+            padding: 12px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #fff;
+            width: 130px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .currency-select option {
+            background-color: #333;
+            color: #fff;
+        }
+        .exchange-input {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .exchange-input input {
+            width: 150px;
+            padding: 12px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 16px;
+        }
+        .exchange-arrow {
+            color: #4CAF50;
+            font-size: 24px;
+            margin: 0 10px;
+        }
+        .currency-label {
+            color: #aaa;
+            font-size: 16px;
+            min-width: 100px;
+        }
+        .button-group {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin: 0 auto;
+        }
+        .convert-button, .close-button {
+            width: auto;
+            padding: 10px 30px;
+            margin: 0;
+            display: inline-block;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            color: white;
+        }
+        .convert-button {
+            background-color: #4CAF50;
+        }
+        .convert-button:hover {
+            background-color: #45a049;
+        }
+        .close-button {
+            background-color: #ff4444;
+        }
+        .close-button:hover {
+            background-color: #ff0000;
+        }
+        .rate-info {
+            text-align: center;
+            color: #aaa;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+        .loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            text-align: center;
+            padding: 5px;
+            font-size: 12px;
+        }
+        input::placeholder {
+            color: #666;
+            font-size: 14px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4CAF50;
+        }
+        .rate-display {
+            margin-top: 20px;
+            font-size: 20px;  /* 字号 */
+            color: #ff0000;   /* 字体颜色改为红色 */
+            text-align: left; /* 文字左对齐 */
+            padding: 15px;    /* 内边距 */
+            border-radius: 8px; /* 圆角 */
+            height: 60px;     /* 增加高度 */
+        }
+        .manual-conversion {
+            display: none; /* 隐藏人工换算区域 */
+            margin-top: 30px;
+            background-color: #222; /* 灰底 */
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .manual-conversion-title {
+            font-size: 18px;
+            color: #fff;
+            margin-bottom: 10px;
+        }
+        .manual-input-group {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+        .manual-input {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .manual-input input {
+            width: 100%;
+            padding: 10px;
+            background-color: #333;
+            border: 1px solid #444;
+            border-radius: 4px;
+            color: #fff;
+            font-size: 16px;
+        }
+        .manual-input .currency-label {
+            color: #aaa;
+            font-size: 16px;
+        }
+        .manual-result {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #fff;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="content-wrapper">
+            <div class="page-title">常用工具-汇率换算</div>
+            <div class="exchange-grid">
+                <div class="exchange-card">
+                    <div class="currency-symbol">$</div>
+                    <div class="currency-name">美元 (USD)</div>
+                    <div class="exchange-rate">1 CNY ≈ 0.1367 USD</div>
+                    <div class="converted-amount" id="usd-amount">0.00 USD</div>
+                </div>
+                <div class="exchange-card">
+                    <div class="currency-symbol">€</div>
+                    <div class="currency-name">欧元 (EUR)</div>
+                    <div class="exchange-rate">1 CNY ≈ 0.1277 EUR</div>
+                    <div class="converted-amount" id="eur-amount">0.00 EUR</div>
+                </div>
+                <div class="exchange-card">
+                    <div class="currency-symbol">£</div>
+                    <div class="currency-name">英镑 (GBP)</div>
+                    <div class="exchange-rate">1 CNY ≈ 0.1092 GBP</div>
+                    <div class="converted-amount" id="gbp-amount">0.00 GBP</div>
+                </div>
+                <div class="exchange-card">
+                    <div class="currency-symbol">¥</div>
+                    <div class="currency-name">日元 (JPY)</div>
+                    <div class="exchange-rate">1 CNY ≈ 20.85 JPY</div>
+                    <div class="converted-amount" id="jpy-amount">0.00 JPY</div>
+                </div>
+                <div class="exchange-card">
+                    <div class="currency-symbol">₩</div>
+                    <div class="currency-name">韩元 (KRW)</div>
+                    <div class="exchange-rate">1 CNY ≈ 183.45 KRW</div>
+                    <div class="converted-amount" id="krw-amount">0.00 KRW</div>
+                </div>
+                <div class="exchange-card">
+                    <div class="currency-symbol">A$</div>
+                    <div class="currency-name">澳元 (AUD)</div>
+                    <div class="exchange-rate">1 CNY ≈ 0.2137 AUD</div>
+                    <div class="converted-amount" id="aud-amount">0.00 AUD</div>
+                </div>
+                <div class="exchange-card">
+                    <div class="currency-symbol">HK$</div>
+                    <div class="currency-name">港币 (HKD)</div>
+                    <div class="exchange-rate">1 CNY ≈ 1.0692 HKD</div>
+                    <div class="converted-amount" id="hkd-amount">0.00 HKD</div>
+                </div>
+                <div class="exchange-card">
+                    <div class="currency-symbol">C$</div>
+                    <div class="currency-name">加元 (CAD)</div>
+                    <div class="exchange-rate">1 CNY ≈ 0.1862 CAD</div>
+                    <div class="converted-amount" id="cad-amount">0.00 CAD</div>
+                </div>
+                <div class="exchange-card">
+                    <div class="currency-symbol">฿</div>
+                    <div class="currency-name">泰铢 (THB)</div>
+                    <div class="exchange-rate">1 CNY ≈ 4.8932 THB</div>
+                    <div class="converted-amount" id="thb-amount">0.00 THB</div>
+                </div>
+            </div>
+            <div class="input-group">
+                <div class="exchange-input">
+                    <select id="currency-select" class="currency-select" onchange="updateConversion()">
+                        <option value="USD">美元 (USD)</option>
+                        <option value="EUR">欧元 (EUR)</option>
+                        <option value="GBP">英镑 (GBP)</option>
+                        <option value="JPY">日元 (JPY)</option>
+                        <option value="KRW">韩元 (KRW)</option>
+                        <option value="AUD">澳元 (AUD)</option>
+                        <option value="HKD">港币 (HKD)</option>
+                        <option value="CAD">加元 (CAD)</option>
+                        <option value="THB">泰铢 (THB)</option>
+                    </select>
+                    <input type="number" id="foreign-amount" placeholder="请输入金额" oninput="updateConversion()">
+                </div>
+                <div class="exchange-arrow">→</div>
+                <div class="exchange-input">
+                    <span class="currency-label">人民币 (CNY)</span>
+                    <input type="number" id="cny-amount" placeholder="换算结果" readonly>
+                </div>
+            </div>
+            <div class="rate-display" id="rate-display">当前参考汇率：1 USD ≈ 7.3155 CNY</div>
+            <div class="button-group">
+                <button class="convert-button" onclick="showManualConversion()">手工换算</button>
+                <button class="close-button" onclick="window.close()">关闭</button>
+            </div>
+            <div class="manual-conversion" id="manual-conversion">
+                <div class="manual-conversion-title">人工换算</div>
+                <div class="manual-input-group">
+                    <div class="manual-input">
+                        <input type="number" id="manual-cny" placeholder="人民币金额" oninput="updateManualConversion()">
+                        <span class="currency-label">人民币 (CNY)</span>
+                    </div>
+                    <div class="manual-input">
+                        <input type="number" id="manual-foreign" placeholder="外币金额" oninput="updateManualConversion()">
+                        <span class="currency-label" id="manual-currency-label">外币</span>
+                    </div>
+                </div>
+                <div class="manual-result" id="manual-result">1 USD ≈ 7.3370 CNY</div>
+            </div>
+            <div class="rate-info">汇率仅供参考，实际交易以银行牌价为准</div>
+        </div>
+    </div>
+
+    <div id="loading" class="loading" style="display: none;">正在更新汇率数据...</div>
+
+    <script>
+        const exchangeRates = {
+            USD: 0.1367,
+            EUR: 0.1277,
+            GBP: 0.1092,
+            JPY: 20.85,
+            KRW: 183.45,
+            AUD: 0.2137,
+            HKD: 1.0692,
+            CAD: 0.1862,
+            THB: 4.8932
+        };
+
+        // 修改汇率显示更新函数
+        function updateExchangeRateDisplay() {
+            for (const [currency, rate] of Object.entries(exchangeRates)) {
+                const rateElement = document.querySelector(`.exchange-card:has(.currency-name:contains('${currency}')) .exchange-rate`);
+                if (rateElement) {
+                    // 计算反向汇率（1外币等于多少人民币）
+                    const reverseRate = (1 / rate).toFixed(4);
+                    rateElement.textContent = `1 ${currency} ≈ ${reverseRate} CNY`;
+                }
+            }
+            // 如果有输入值，更新换算结果
+            if (document.getElementById('foreign-amount').value) {
+                updateConversion();
+            }
+        }
+
+        // 修改获取汇率的函数
+        async function fetchExchangeRates() {
+            const loadingElement = document.getElementById('loading');
+            loadingElement.style.display = 'block';
+            
+            try {
+                // 使用 ExchangeRate-API 获取实时汇率
+                const response = await fetch('https://open.er-api.com/v6/latest/CNY');
+                const data = await response.json();
+                
+                // 更新汇率对象
+                for (const [currency, rate] of Object.entries(data.rates)) {
+                    if (exchangeRates.hasOwnProperty(currency)) {
+                        exchangeRates[currency] = rate;
+                    }
+                }
+
+                // 更新显示的汇率
+                updateExchangeRateDisplay();
+                
+                // 更新最后更新时间
+                const updateTime = new Date(data.time_last_update_utc).toLocaleString('zh-CN');
+                document.querySelector('.rate-info').textContent = 
+                    `数据更新时间: ${updateTime}（汇率仅供参考，实际交易以银行牌价为准）`;
+            } catch (error) {
+                console.error('获取汇率失败:', error);
+            } finally {
+                loadingElement.style.display = 'none';
+            }
+        }
+
+        // 添加新的转换函数
+        function updateConversion() {
+            const foreignAmount = parseFloat(document.getElementById('foreign-amount').value);
+            const selectedCurrency = document.getElementById('currency-select').value;
+            
+            if (isNaN(foreignAmount)) {
+                document.getElementById('cny-amount').value = '';
+                document.getElementById('rate-display').textContent = '当前参考汇率：'; // 清空汇率显示
+                return;
+            }
+
+            // 计算人民币金额
+            const cnyAmount = (foreignAmount / exchangeRates[selectedCurrency]).toFixed(2);
+            document.getElementById('cny-amount').value = cnyAmount;
+
+            // 更新汇率显示
+            const reverseRate = (1 / exchangeRates[selectedCurrency]).toFixed(4);
+            document.getElementById('rate-display').textContent = `当前参考汇率：1 ${selectedCurrency} ≈ ${reverseRate} CNY`;
+
+            // 更新所有货币卡片的显示
+            for (const [currency, rate] of Object.entries(exchangeRates)) {
+                let result;
+                const amount = cnyAmount * rate;
+                if (currency === 'JPY' || currency === 'KRW' || currency === 'THB') {
+                    result = Math.round(amount);
+                } else {
+                    result = amount.toFixed(2);
+                }
+                document.getElementById(`${currency.toLowerCase()}-amount`).textContent = 
+                    `${result} ${currency}`;
+            }
+        }
+
+        // 新增人工换算功能
+        function updateManualConversion() {
+            const manualCnyAmount = parseFloat(document.getElementById('manual-cny').value);
+            const manualForeignAmount = parseFloat(document.getElementById('manual-foreign').value);
+            
+            if (!isNaN(manualCnyAmount) && manualCnyAmount > 0) {
+                const result = (manualForeignAmount / manualCnyAmount).toFixed(4);
+                document.getElementById('manual-result').textContent = `1 外币 ≈ ${result} CNY`;
+            } else {
+                document.getElementById('manual-result').textContent = '';
+            }
+        }
+
+        // 显示人工换算区域
+        function showManualConversion() {
+            const manualConversion = document.getElementById('manual-conversion');
+            if (manualConversion.style.display === 'none' || manualConversion.style.display === '') {
+                manualConversion.style.display = 'block';
+            } else {
+                manualConversion.style.display = 'none';
+            }
+        }
+
+        // 页面加载时获取汇率
+        fetchExchangeRates();
+
+        // 每5分钟更新一次汇率
+        setInterval(fetchExchangeRates, 5 * 60 * 1000);
+    </script>
+</body>
+</html> 

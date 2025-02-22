@@ -1,0 +1,544 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>快速补救（现金）处置及材料单生成器</title>
+    <script src="https://unpkg.com/html-docx-js/dist/html-docx.js"></script>
+    <style>
+        /* 复用原有样式 */
+        body {
+            background-color: #000000;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #ffffff;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            margin-top: 60px;
+        }
+
+        h1 {
+            color: #ffffff;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 500;
+            font-size: 24px;
+        }
+
+        .form-section {
+            background-color: rgba(30, 30, 30, 0.95);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            color: #999999;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"],
+        textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            background-color: rgba(45, 45, 45, 0.95);
+            border: 1px solid #333333;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #ffffff;
+            transition: all 0.2s ease;
+        }
+
+        textarea {
+            min-height: 80px;
+            resize: vertical;
+        }
+
+        .button-container {
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        button {
+            background-color: #FF5722;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin: 0 10px;
+        }
+
+        button.preview-btn {
+            background-color: #424242;
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        td { 
+            font-family: SimSun;
+            font-size: 11pt;
+            border: 1px solid black; 
+            padding: 5pt;
+            height: 24pt;
+            vertical-align: middle;
+            text-align: center;
+        }
+        .cell-header {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+        .highlight { 
+            color: red;
+            font-family: SimSun;
+            font-size: 11pt;
+            text-align: center;
+        }
+
+        /* 添加菜单栏样式 */
+        .menu-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #333;
+            padding: 10px 0;
+            z-index: 1000;
+            text-align: center;
+        }
+
+        .menu-bar a {
+            color: #fff;
+            text-decoration: none;
+            padding: 10px 20px;
+            margin: 0 10px;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        .menu-bar a:hover {
+            background-color: #555;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <!-- 添加菜单栏 -->
+    <div class="menu-bar">
+        <a href="index.html">主页</a>
+        <a href="Tool&File/Exchange_Rate.html" target="_blank">汇率换算</a>
+        <a href="Tool&File/Time_Zones.html" target="_blank">世界时钟</a>
+        <a href="Tool&File/Quick_Table.html" target="_blank">快速补救速查表</a>
+        <a href="Tool&File/Operation_Regulations.html" target="_blank">快速补救文件</a>
+    </div>
+
+    <div class="container">
+        <h1>快速补救（现金）处置及材料单生成器</h1>
+
+        <div class="form-section">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="complaintNumber">投诉编号：</label>
+                    <input type="text" id="complaintNumber">
+                </div>
+                <div class="form-group">
+                    <label for="compensationNumber">补救单号：</label>
+                    <input type="text" id="compensationNumber">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="passengerName">旅客姓名：</label>
+                    <input type="text" id="passengerName">
+                </div>
+                <div class="form-group">
+                    <label for="ticketNumber">票号：</label>
+                    <input type="text" id="ticketNumber">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="idNumber">证件号：</label>
+                    <input type="text" id="idNumber">
+                </div>
+                <div class="form-group">
+                    <label for="contactNumber">联系电话：</label>
+                    <input type="text" id="contactNumber">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="flightNumber">航班号：</label>
+                    <input type="text" id="flightNumber">
+                </div>
+                <div class="form-group">
+                    <label for="routeAndAircraft">航程/机型：</label>
+                    <input type="text" id="routeAndAircraft">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="situation">情况说明：</label>
+                <textarea id="situation"></textarea>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="compensationAmount">补偿金额：</label>
+                    <input type="text" id="compensationAmount">
+                    <div style="color: #FF5722; font-size: 12px; margin-top: 5px;">
+                        涉及外币需标明汇率，范例：1748.56元（汇率：1 JPY ≈ 0.0471 CNY）
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="compensationReason">赔偿原因：</label>
+                    <input type="text" id="compensationReason">
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <div class="form-group">
+                <label for="bankInfo">户名/银行/开户行：</label>
+                <input type="text" id="bankInfo">
+            </div>
+            <div class="form-group">
+                <label for="bankAccount">银行账号：</label>
+                <input type="text" id="bankAccount">
+            </div>
+        </div>
+
+        <div class="button-container">
+            <button class="preview-btn" onclick="previewForm()">预览表单</button>
+            <button onclick="exportToWord()">导出Word</button>
+        </div>
+    </div>
+
+    <script>
+        function previewForm() {
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0,0,0,0.8);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+            `;
+
+            const content = document.createElement('div');
+            content.style.cssText = `
+                background: #fff;
+                padding: 20px;
+                border-radius: 8px;
+                width: 90%;
+                max-width: 1000px;
+                max-height: 80vh;
+                overflow-y: auto;
+                color: #000;
+            `;
+
+            const headerData = [
+                { label: '补救单号', value: document.getElementById('compensationNumber').value },
+                { label: '投诉编号', value: document.getElementById('complaintNumber').value },
+                { label: '赔偿原因', value: document.getElementById('compensationReason').value },
+                { label: '旅客姓名', value: document.getElementById('passengerName').value },
+                { label: '票号', value: document.getElementById('ticketNumber').value },
+                { label: '证件号', value: document.getElementById('idNumber').value },
+                { label: '补偿金额', value: document.getElementById('compensationAmount').value }
+            ];
+
+            const bankInfo = {
+                label: '户名/银行/开户行',
+                value: document.getElementById('bankInfo').value
+            };
+            const bankAccount = {
+                label: '银行账号',
+                value: document.getElementById('bankAccount').value
+            };
+
+            // 修改预览内容的HTML结构
+            content.innerHTML = `
+                <h2 style="text-align: center; margin-bottom: 20px;">快速补救处置及材料单预览</h2>
+                <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5; width: 20%;"><strong>补救单号</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5; width: 20%;"><strong>投诉编号</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5; width: 20%;"><strong>赔偿原因</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5; width: 20%;"><strong>旅客姓名</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5; width: 20%;"><strong>票号</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">${document.getElementById('compensationNumber').value}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">${document.getElementById('complaintNumber').value}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">${document.getElementById('compensationReason').value}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">${document.getElementById('passengerName').value}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">${document.getElementById('ticketNumber').value}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5;"><strong>证件号</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5;"><strong>户名/银行/开户行</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5;"><strong>银行帐号</strong></td>
+                        <td style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5;" colspan="2"><strong>补偿金额</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px;">${document.getElementById('idNumber').value}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">${document.getElementById('bankInfo').value}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;">${document.getElementById('bankAccount').value}</td>
+                        <td style="border: 1px solid #ddd; padding: 12px;" colspan="2">${document.getElementById('compensationAmount').value}</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px; background: #f5f5f5;" colspan="5"><strong>情况说明</strong></td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #ddd; padding: 12px; white-space: pre-wrap;" colspan="5">${document.getElementById('situation').value}</td>
+                    </tr>
+                </table>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="this.parentElement.parentElement.parentElement.remove()" 
+                            style="padding: 8px 16px; background: #FF5722; color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        关闭预览
+                    </button>
+                </div>
+            `;
+
+            modal.appendChild(content);
+            document.body.appendChild(modal);
+
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        function createPreviewTable(data) {
+            const rows = Math.ceil(data.length / 3);
+            let html = '';
+            
+            for (let i = 0; i < rows; i++) {
+                html += '<tr>';
+                for (let j = 0; j < 3; j++) {
+                    const index = i * 3 + j;
+                    if (index < data.length) {
+                        html += `
+                            <td style="border: 1px solid #ddd; padding: 12px; width: 33.33%;">
+                                <strong>${data[index].label}:</strong> ${data[index].value}
+                            </td>
+                        `;
+                    } else {
+                        html += '<td style="border: 1px solid #ddd; padding: 12px;"></td>';
+                    }
+                }
+                html += '</tr>';
+            }
+            return html;
+        }
+
+        function exportToWord() {
+            const values = {
+                compensationNumber: document.getElementById('compensationNumber').value,
+                complaintNumber: document.getElementById('complaintNumber').value,
+                passengerName: document.getElementById('passengerName').value,
+                ticketNumber: document.getElementById('ticketNumber').value,
+                idNumber: document.getElementById('idNumber').value,
+                contactNumber: document.getElementById('contactNumber').value,
+                flightNumber: document.getElementById('flightNumber').value,
+                routeAndAircraft: document.getElementById('routeAndAircraft').value,
+                situation: document.getElementById('situation').value,
+                compensationAmount: document.getElementById('compensationAmount').value,
+                bankInfo: document.getElementById('bankInfo').value,
+                bankAccount: document.getElementById('bankAccount').value,
+                compensationReason: document.getElementById('compensationReason').value
+            };
+
+            const content = `
+                <html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'>
+                <head>
+                    <meta charset='utf-8'>
+                    <style>
+                        @font-face {
+                            font-family: SimSun;
+                            src: local('SimSun');
+                        }
+                        @font-face {
+                            font-family: SimHei;
+                            src: local('SimHei');
+                        }
+                        body { 
+                            font-family: SimSun; 
+                            font-size: 11pt; 
+                            line-height: 1.5; 
+                        }
+                        .title1 {
+                            font-family: SimHei;
+                            font-size: 20pt;
+                            margin-bottom: 10pt;
+                        }
+                        .title2 {
+                            font-family: SimHei;
+                            font-size: 20pt;
+                            text-align: center;
+                            margin: 15pt 0;
+                        }
+                        .subtitle {
+                            font-family: SimHei;
+                            font-size: 20pt;
+                            margin: 10pt 0;
+                        }
+                        .list {
+                            font-family: SimHei;
+                            font-size: 11pt;
+                            margin: 5pt 0;
+                            padding-left: 20pt;
+                        }
+                        .attachment {
+                            font-family: SimHei;
+                            font-size: 11pt;
+                            margin: 5pt 0;
+                        }
+                        table { 
+                            width: 100%; 
+                            border-collapse: collapse;
+                            margin-top: 5pt;
+                        }
+                        .cell-header {
+                            background-color: #f2f2f2;
+                        }
+                        td { 
+                            font-family: SimSun;
+                            font-size: 11pt;
+                            border: 1px solid black; 
+                            padding: 5pt;
+                            height: 24pt;
+                            vertical-align: middle;
+                            text-align: center;
+                        }
+                        .highlight { 
+                            color: red;
+                            font-family: SimSun;
+                            font-size: 11pt;
+                            text-align: center;
+                        }
+                        .no-border {
+                            border: none;
+                        }
+                        .signature {
+                            font-family: SimSun;
+                            font-size: 11pt;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="title1">一、快速补救</div>
+                    
+                    <div class="title2">东航服务快速补救处置单</div>
+
+                    <div class="subtitle">二、补偿材料信息</div>
+                    <div class="list">1、证件信息</div>
+                    <div class="list">2、机票信息</div>
+                    <div class="list">3、其他机票（车票）凭证</div>
+                    <div class="list">4、住宿（交通）凭证</div>
+                    <div class="list">5、委托书</div>
+                    <div class="attachment">附件：赔偿/补偿费用申请单</div>
+
+                    <table>
+                        <tr>
+                            <td class="cell-header" style="width: 20%;">投诉情况</td>
+                            <td class="cell-header" style="width: 30%;">【投诉编号】</td>
+                            <td><span class="highlight">${values.complaintNumber}</span></td>
+                        </tr>
+                        <tr>
+                            <td rowspan="4" class="cell-header" style="width: 20%;">旅客信息</td>
+                            <td class="cell-header">【旅客姓名】</td>
+                            <td><span class="highlight">${values.passengerName}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="cell-header">【票号】</td>
+                            <td><span class="highlight">${values.ticketNumber}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="cell-header">【证件号】</td>
+                            <td><span class="highlight">${values.idNumber}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="cell-header">【联系电话】</td>
+                            <td><span class="highlight">${values.contactNumber}</span></td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2" class="cell-header">航班信息</td>
+                            <td class="cell-header">【航班/日期】</td>
+                            <td><span class="highlight">${values.flightNumber}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="cell-header">【航程/机型】</td>
+                            <td><span class="highlight">${values.routeAndAircraft}</span></td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2" class="cell-header">补偿赔偿<br>情况说明</td>
+                            <td colspan="2" style="height: 80pt;"><span class="highlight">${values.situation}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="cell-header">【金额/汇率】</td>
+                            <td><span class="highlight">${values.compensationAmount}</span></td>
+                        </tr>
+                        <tr>
+                            <td rowspan="2" class="cell-header">支付信息</td>
+                            <td class="cell-header">【户名/银行/开户行】</td>
+                            <td><span class="highlight">${values.bankInfo}</span></td>
+                        </tr>
+                        <tr>
+                            <td class="cell-header">【银行帐号】</td>
+                            <td><span class="highlight">${values.bankAccount}</span></td>
+                        </tr>
+                    </table>
+                </body>
+                </html>
+            `;
+
+            const converted = htmlDocx.asBlob(content);
+            const fileName = `${values.compensationNumber}_${values.passengerName}.docx`;
+            const downloadLink = document.createElement('a');
+            downloadLink.href = URL.createObjectURL(converted);
+            downloadLink.download = fileName;
+            document.body.appendChild(downloadLink);
+            downloadLink.click();
+            document.body.removeChild(downloadLink);
+        }
+    </script>
+</body>
+</html> 
