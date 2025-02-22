@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站导航首页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+
+        .container {
+            display: flex;
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .section {
+            flex: 1;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            min-height: 400px;
+        }
+
+        h2 {
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ddd;
+        }
+
+        ul {
+            list-style: none;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        a {
+            color: #2c3e50;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        a:hover {
+            color: #3498db;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="section">
+            <h2>第一部分</h2>
+            <ul>
+                <li><a href="./section1/page1.html">页面 1</a></li>
+                <li><a href="./section1/page2.html">页面 2</a></li>
+                <li><a href="./section1/page3.html">页面 3</a></li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>第二部分</h2>
+            <ul>
+                <li><a href="./section2/page1.html">页面 1</a></li>
+                <li><a href="./section2/page2.html">页面 2</a></li>
+                <li><a href="./section2/page3.html">页面 3</a></li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>第三部分</h2>
+            <ul>
+                <li><a href="./section3/page1.html">页面 1</a></li>
+                <li><a href="./section3/page2.html">页面 2</a></li>
+                <li><a href="./section3/page3.html">页面 3</a></li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html> 
